@@ -91,11 +91,11 @@ void Widget::getQuatData()
     if(openGLWidget) openGLWidget->quatToMatrix(w,x,y,z);
 
     QString str;
-    str.sprintf("%f %f %f %f %f %f %f\n",
-                w,x,y,z,pitch,roll,yaw);
-    ui->recieveTextBrowser->setTextColor(Qt::black);
-    ui->recieveTextBrowser->moveCursor(QTextCursor::End);
-    ui->recieveTextBrowser->insertPlainText(str);
+//    str.sprintf("%f %f %f %f\n",
+//                w,x,y,z);
+//    ui->recieveTextBrowser->setTextColor(Qt::black);
+//    ui->recieveTextBrowser->moveCursor(QTextCursor::End);
+//    ui->recieveTextBrowser->insertPlainText(str);
 
     str.sprintf("%f",w);
     ui->label_w_display->setText(str);
@@ -111,6 +111,28 @@ void Widget::getQuatData()
     ui->label_roll_display->setText(str);
     str.sprintf("%f",yaw);
     ui->label_yaw_display->setText(str);
+
+    getAccelData();
+}
+
+void Widget::getAccelData()
+{
+    short accel[3];
+    const float scaleFactor= 16394.0f;
+    float ax,ay,az;
+
+    if(myCom->getAccel(accel) == 0) return;
+
+    ax = (float)accel[0] / scaleFactor;
+    ay = (float)accel[1] / scaleFactor;
+    az = (float)accel[2] / scaleFactor;
+
+    QString str;
+    str.sprintf("%f %f %f\n",
+                ax,ay,az);
+    ui->recieveTextBrowser->setTextColor(Qt::black);
+    ui->recieveTextBrowser->moveCursor(QTextCursor::End);
+    ui->recieveTextBrowser->insertPlainText(str);
 }
 
 void Widget::on_openclosebtn_clicked()

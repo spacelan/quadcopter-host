@@ -42,6 +42,7 @@ private:
 
 private slots:
     void getQuatData();
+    void getAccelData();
     void anchorClickedSlot(const QUrl&);
 
     void on_openclosebtn_clicked();

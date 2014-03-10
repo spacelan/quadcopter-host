@@ -16,7 +16,7 @@ Communication::Communication(QObject *parent) :
 {
     mySerialPort = new QextSerialPort;
     refreshTimer = new QTimer();
-    refreshTimer->setInterval(20);
+    refreshTimer->setInterval(10);
     refreshTimer->start();
     connect(refreshTimer,SIGNAL(timeout()),this,SLOT(getData()));
     isDataReady = DATA_TYPE_NONE;
@@ -27,7 +27,7 @@ Communication::Communication(const QString &name, const PortSettings &settings, 
 {
     mySerialPort = new QextSerialPort(name,settings);
     refreshTimer = new QTimer();
-    refreshTimer->setInterval(20);
+    refreshTimer->setInterval(10);
     refreshTimer->start();
     connect(refreshTimer,SIGNAL(timeout()),this,SLOT(getData()));
     isDataReady = false;
