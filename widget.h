@@ -9,6 +9,7 @@
 #include <QTimer>
 #include <windows.h>
 #include <QCloseEvent>
+#include <QSettings>
 #include "nehewidget/nehewidget.h"
 #include "communication.h"
 
@@ -37,6 +38,7 @@ private:
     Communication *myCom;
     NeHeWidget *openGLWidget;
     QTimer *refreshTimer;
+    QSettings *mySettings;
     bool isFirst;
     bool isRun;
 

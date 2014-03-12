@@ -10,6 +10,7 @@ Widget::Widget(QWidget *parent) :
     ui(new Ui::Widget)
 {
     ui->setupUi(this);
+    mySettings = new QSettings("settings.ini",QSettings::IniFormat);
     myCom = NULL;
     openGLWidget = NULL;
     refreshTimer = NULL;
@@ -37,14 +38,20 @@ Widget::Widget(QWidget *parent) :
     ui->recieveTextBrowser->moveCursor(QTextCursor::End);
     ui->recieveTextBrowser->insertPlainText("Copyright (c) 2014 spacelan1993@gmail.com All rights reserved.");
     ui->recieveTextBrowser->moveCursor(QTextCursor::Start);
-    ui->portnameComboBox->setCurrentIndex(3);
-    ui->baudRateComboBox->setCurrentIndex(1);
+
+    ui->portnameComboBox->setCurrentIndex(mySettings->value("SERIAL_PORT_NAME",0).toInt());
+    ui->baudRateComboBox->setCurrentIndex(mySettings->value("SERIAL_BAUD_RATE",0).toInt());
+    ui->dataBitsComboBox->setCurrentIndex(mySettings->value("SERIAL_DATA_BITS",0).toInt());
+    ui->parityComboBox->setCurrentIndex(mySettings->value("SERIAL_PARITY",0).toInt());
+    ui->stopbitsComboBox->setCurrentIndex(mySettings->value("SERIAL_STOP_BITS",0).toInt());
 }
 
 Widget::~Widget()
 {
+    delete refreshTimer;
+    delete openGLWidget;
     delete myCom;
-    myCom = NULL;
+    delete mySettings;
     delete ui;
 }
 
@@ -59,23 +66,26 @@ void Widget::setComboxEnabled(bool b)
 
 void Widget::closeEvent(QCloseEvent *e)
 {
-    delete openGLWidget;
-    openGLWidget = NULL;
+    mySettings->setValue("SERIAL_PORT_NAME",ui->portnameComboBox->currentIndex());
+    mySettings->setValue("SERIAL_BAUD_RATE",ui->baudRateComboBox->currentIndex());
+    mySettings->setValue("SERIAL_DATA_BITS",ui->dataBitsComboBox->currentIndex());
+    mySettings->setValue("SERIAL_PARITY",ui->parityComboBox->currentIndex());
+    mySettings->setValue("SERIAL_STOP_BITS",ui->stopbitsComboBox->currentIndex());
     e->accept();
 }
 
 void Widget::getQuatData()
 {
     long quat[4];
-    const float q30 = 1073741824.0f;
+//    const float q30 = 1073741824.0f;
     float w,x,y,z;
 
     if(myCom->getQuat(quat) == 0) return;
 
-    w = (float)quat[0] / q30;
-    x = (float)quat[1] / q30;
-    y = (float)quat[2] / q30;
-    z = (float)quat[3] / q30;
+    w = (float)quat[0] ;// q30;
+    x = (float)quat[1] ;// q30;
+    y = (float)quat[2] ;// q30;
+    z = (float)quat[3] ;// q30;
 
     float norm = math_rsqrt(w*w + x*x + y*y + z*z);
     w *= norm;
@@ -170,10 +180,10 @@ void Widget::on_openclosebtn_clicked()
     switch(ui->dataBitsComboBox->currentIndex())
     {
     case 0:
-        settings.DataBits = (DATA_8);
+        settings.DataBits = (DATA_7);
         break;
     case 1:
-        settings.DataBits = (DATA_7);
+        settings.DataBits = (DATA_8);
         break;
     default:
         settings.DataBits = (DATA_8);
@@ -226,6 +236,8 @@ void Widget::on_openclosebtn_clicked()
     }
     else
     {
+        delete myCom;
+        myCom = NULL;
         QMessageBox::critical(this, tr("打开失败"), tr("未能打开串口 ") + portName + tr("\n该串口设备不存在或已被占用"), QMessageBox::Ok);
         return;
     }

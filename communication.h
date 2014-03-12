@@ -40,8 +40,6 @@ public:
     bool getGyro(short *needGyro);
 
     QextSerialPort *mySerialPort;
-    QTimer *refreshTimer;
-    unsigned char isDataReady;
 
 signals:
 
@@ -49,11 +47,12 @@ public slots:
     void getData();
 
 private:
+    QTimer *refreshTimer;
+    unsigned char isDataReady;
     long quat[4];
     short accel[3],gyro[3];
     COMMAND_TYPE cmd;
-    //DATA_TYPE中各数据长度
-    int dataLength[129];
+    int dataLength[129];    //DATA_TYPE中各数据长度
 };
 
 #endif // COMMUNICATION_H

@@ -42,9 +42,7 @@ Communication::Communication(const QString &name, const PortSettings &settings, 
 Communication::~Communication()
 {
     delete mySerialPort;
-    mySerialPort = NULL;
     delete refreshTimer;
-    refreshTimer = NULL;
 }
 
 void Communication::sendData(void *data, int dataType)
@@ -131,17 +129,23 @@ void Communication::getData()
     }
     if(state == NEED_DATA)
     {
-        if(mySerialPort->size() < dataLength[(int)byte]) return;
+        int length = dataLength[(int)byte];
+        if(mySerialPort->size() < length) return;
+        char temp[16];
+        mySerialPort->read(temp,length);
         switch ((DATA_TYPE)byte)
         {
         case DATA_TYPE_QUAT:
-            mySerialPort->read((char*)quat, dataLength[(int)byte]);
+            for(int i=0;i<4;i++)
+                quat[i] = ((long*)temp)[i];
             break;
         case DATA_TYPE_ACCEL:
-            mySerialPort->read((char*)accel,dataLength[(int)byte]);
+            for(int i=0;i<3;i++)
+                accel[i] = ((short*)temp)[i];
             break;
         case DATA_TYPE_GYRO:
-            mySerialPort->read((char*)gyro, dataLength[(int)byte]);
+            for(int i=0;i<3;i++)
+                gyro[i] = ((short*)temp)[i];
             break;
         default:
             break;

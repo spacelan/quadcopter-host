@@ -10,8 +10,11 @@ int main(int argc, char *argv[])
     QApplication a(argc, argv);
     QTextCodec::setCodecForTr(QTextCodec::codecForName("utf8"));
     Q_INIT_RESOURCE(image);
-    Widget w;
-    w.show();
+    QApplication::setOrganizationName("Spacelan");
+    QApplication::setApplicationName("quadcopter-host");
+    Widget *w = new Widget;
+    w->setAttribute(Qt::WA_DeleteOnClose,true);
+    w->show();
     
     return a.exec();
 }

@@ -43,6 +43,7 @@ NeHeWidget::NeHeWidget(QGLWidget *parent, bool fs) :
 //析构函数
 NeHeWidget::~NeHeWidget()
 {
+    delete myTimer;
     delete ui;
 }
 
