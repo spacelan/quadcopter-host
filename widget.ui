@@ -72,6 +72,16 @@
          <string>COM8</string>
         </property>
        </item>
+       <item>
+        <property name="text">
+         <string>COM9</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>COM10</string>
+        </property>
+       </item>
       </widget>
      </item>
      <item>
@@ -106,12 +116,12 @@
       <widget class="QComboBox" name="dataBitsComboBox">
        <item>
         <property name="text">
-         <string>8bits</string>
+         <string>7bits</string>
         </property>
        </item>
        <item>
         <property name="text">
-         <string>7bits</string>
+         <string>8bits</string>
         </property>
        </item>
       </widget>

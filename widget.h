@@ -15,7 +15,7 @@
 
 
 //串口读写延时
-#define TIME_OUT 10
+#define TIME_OUT 5
 
 namespace Ui {
 class Widget;

@@ -101,11 +101,11 @@ void Widget::getQuatData()
     if(openGLWidget) openGLWidget->quatToMatrix(w,x,y,z);
 
     QString str;
-//    str.sprintf("%f %f %f %f\n",
-//                w,x,y,z);
-//    ui->recieveTextBrowser->setTextColor(Qt::black);
-//    ui->recieveTextBrowser->moveCursor(QTextCursor::End);
-//    ui->recieveTextBrowser->insertPlainText(str);
+    str.sprintf("%f %f %f %f\n",
+                w,x,y,z);
+    ui->recieveTextBrowser->setTextColor(Qt::black);
+    ui->recieveTextBrowser->moveCursor(QTextCursor::End);
+    ui->recieveTextBrowser->insertPlainText(str);
 
     str.sprintf("%f",w);
     ui->label_w_display->setText(str);
