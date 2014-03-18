@@ -14,24 +14,12 @@ enum GET_DATA_STATE
 
 uint16_t math_crc16(uint16_t crc,const void * data,uint16_t len);
 
-Communication::Communication(const QString &name, const PortSettings &settings, QObject *parent) :
+Communication::Communication(QObject *parent) :
     QObject(parent)
 {
-    mySerialPort = new QSerialPort(name,this);
-    mySerialPort->setBaudRate(settings.BaudRate);
-    mySerialPort->setDataBits(settings.DataBits);
-    mySerialPort->setParity(settings.Parity);
-    mySerialPort->setStopBits(settings.StopBits);
-    mySerialPort->setFlowControl(settings.FlowControl);
-    connect(mySerialPort,SIGNAL(readyRead()),this,SLOT(getData()));
-
-    refreshTimer = new QTimer();
-    refreshTimer->setInterval(5);
-    refreshTimer->start();
-//    connect(refreshTimer,SIGNAL(timeout()),this,SLOT(getData()));
-
-    isDataReady = false;
-
+    mySerialPort = NULL;
+    refreshTimer = NULL;
+    isDataReady = 0;
     dataLength[DATA_TYPE_NONE] = 0;
     dataLength[DATA_TYPE_QUAT] = 16;
     dataLength[DATA_TYPE_ACCEL] = 6;
@@ -45,14 +33,27 @@ Communication::~Communication()
     delete refreshTimer;
 }
 
+bool Communication::openSerialPort(const PortSettings &settings)
+{
+    mySerialPort = new QSerialPort(settings.PortName,this);
+    if(!mySerialPort->open(QIODevice::ReadWrite)) return false;
+    mySerialPort->setBaudRate(settings.BaudRate);
+    mySerialPort->setDataBits(settings.DataBits);
+    mySerialPort->setParity(settings.Parity);
+    mySerialPort->setStopBits(settings.StopBits);
+    mySerialPort->setFlowControl(settings.FlowControl);
+    connect(mySerialPort,SIGNAL(readyRead()),this,SLOT(getData()));
+    return true;
+}
+
 void Communication::sendData(void *data, int dataType)
 {
     char bufHead[] = {0xaa,0x55,dataType};
-    write(bufHead,3);
-    write((char*)data,dataLength[dataType]);
+    writeByte(bufHead,3);
+    writeByte((char*)data,dataLength[dataType]);
 }
 
-void Communication::write(char *data, int length)
+void Communication::writeByte(char *data, int length)
 {
     QEventLoop myLoop;
     for(int i=0;i<length;i++)
@@ -63,6 +64,11 @@ void Communication::write(char *data, int length)
         QTimer::singleShot(1,&myLoop,SLOT(quit()));
         myLoop.exec();
     }
+}
+
+void Communication::writeByte(QByteArray &data)
+{
+    mySerialPort->write(data);
 }
 
 bool Communication::getQuat(long *needQuat)
@@ -91,10 +97,10 @@ bool Communication::getGyro(short *needGyro)
 
 void Communication::getData()
 {
-    static int state = NEED_AA;
-    char byte;
-    static char type = DATA_TYPE_NONE;
+    static GET_DATA_STATE state = NEED_AA;
+    static DATA_TYPE type = DATA_TYPE_NONE;
     static int length = 0;
+    char byte;
 
     if(state == NEED_AA)
     {
@@ -106,7 +112,6 @@ void Communication::getData()
     }
     if(state == NEED_55)
     {
-        qDebug()<<"NEED_55";
         if(mySerialPort->bytesAvailable() < 1) return;
         mySerialPort->read(&byte,1);
         if(byte != (char)0x55)
@@ -119,7 +124,6 @@ void Communication::getData()
     }
     if(state == NEED_TYPE)
     {
-//        qDebug()<<"NEED_TYPE";
         if(mySerialPort->bytesAvailable() < 1) return;
         mySerialPort->read(&byte,1);
         int i;
@@ -128,8 +132,6 @@ void Communication::getData()
         if(i>=6)
         {
             qDebug()<<"TYPE_WRONG "<<(int)byte;
-//            qDebug()<<mySerialPort->bytesAvailable();
-//            mySerialPort->clear();
             if(byte == (char)0xaa)
                 state = NEED_55;
             else
@@ -137,12 +139,11 @@ void Communication::getData()
             return;
         }
         type = (DATA_TYPE)byte;
-        length = dataLength[(int)byte];
+        length = dataLength[type];
         state = NEED_DATA;
     }
     if(state == NEED_DATA)
     {
-//        qDebug()<<"NEED_DATA";
         if(mySerialPort->bytesAvailable() < length + 2) return; //这个地方一定要+2，不然收到的crc可能会为0
         char temp[18];
         unsigned short crc;
@@ -152,10 +153,6 @@ void Communication::getData()
         {
             qDebug()<<"CRC WRONGGGGGGGG "<<crc<<"!="<<math_crc16(0,temp,length);
             mySerialPort->clear();
-//            qDebug()<<mySerialPort->bytesAvailable();
-//            mySerialPort->flush();
-//            mySerialPort->close();
-//            mySerialPort->open(QIODevice::ReadWrite);
             state = NEED_AA;
             return;
         }
@@ -176,9 +173,12 @@ void Communication::getData()
         default:
             break;
         }
-        isDataReady |= (DATA_TYPE)type;
+        isDataReady |= (unsigned char)type;
+        emit dataReady(type);
         state = NEED_AA;
         qDebug()<<"GET!!!!!!!!!!!!!!!!!!!!!!!!";
+        qDebug()<<mySerialPort->bytesAvailable();
+        if(mySerialPort->bytesAvailable()>40) mySerialPort->clear();
     }
 }
 

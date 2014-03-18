@@ -4,13 +4,8 @@
 #include "ui_nehewidget.h"
 #include "math.h"
 
-GLfloat light_ambient[4]={0.5, 0.5, 0.5, 1.0};
-GLfloat light_diffuse[4]={1.0, 1.0, 1.0, 1.0};
-GLfloat light_position[4]={0.0, 0.0, 2.0, 0.0};
-bool light = true;
-
 //构造函数
-NeHeWidget::NeHeWidget(QGLWidget *parent, bool fs) :
+NeHeWidget::NeHeWidget(QGLWidget *parent) :
     QGLWidget(parent),
     ui(new Ui::NeHeWidget)
 {
@@ -19,31 +14,26 @@ NeHeWidget::NeHeWidget(QGLWidget *parent, bool fs) :
     quatToMatrix(1,0,0,0);
 
     //旋转角度
-    rTri = 0;
-    rQuad = 0;
-
     xRot = yRot = zRot = 0;
 
     //定时更新
-    myTimer = new QTimer(this);
-    connect(myTimer,SIGNAL(timeout()),this,SLOT(update()));
-    myTimer->setInterval(10);
-    myTimer->start();
+    refreshTimer = new QTimer(this);
+    connect(refreshTimer,SIGNAL(timeout()),this,SLOT(update()));
+    refreshTimer->setInterval(40);
+    refreshTimer->start();
 
     //窗口位置标题
     setGeometry(100,100,648,480);
     setWindowTitle(tr("终于弄好了有木有！！！"));
 
     //是否全屏
-    fullscreen = fs;
-    if(fullscreen)
-        showFullScreen();
+    fullscreen = false;
 }
 
 //析构函数
 NeHeWidget::~NeHeWidget()
 {
-    delete myTimer;
+    delete refreshTimer;
     delete ui;
 }
 
@@ -61,64 +51,11 @@ void NeHeWidget::initializeGL()
     loadGLTextures();
     glEnable( GL_TEXTURE_2D );
 
-//    glLightfv(GL_LIGHT1, GL_AMBIENT, light_ambient);//指定光源1的环境光参数
-//    glLightfv(GL_LIGHT1, GL_DIFFUSE, light_diffuse);//指定光源1的漫射光参数
-//    glLightfv(GL_LIGHT1, GL_POSITION, light_position);//指定光源1的位置
-//    glEnable(GL_LIGHT1);//允许光源1的使用
-//    glEnable(GL_LIGHTING);//我们还需要启动总光源开关,默认的时候不开，后面的L键来控制开启和关闭
-//    glColor4f(1.0, 1.0, 1.0, 0.5);//后面的步骤都是以全亮绘制物体，并且50%的透明度
 }
 
 //绘制函数
 void NeHeWidget::paintGL()
 {
-
-//    //绘制金字塔
-//    glLoadIdentity();
-//    glTranslatef(-1.5,0.0,-6.0);
-//    glRotatef(rTri,1,0,0);
-//    glBegin(GL_TRIANGLES);
-//        //正面
-//        glColor3f(1,0,0);
-//        glVertex3f(0,1,0);
-//        glColor3f(0,1,0);
-//        glVertex3f(-1,-1,1);
-//        glColor3f(0,0,1);
-//        glVertex3f(1,-1,1);
-//        //右侧面
-//        glColor3f(1,0,0);
-//        glVertex3f(0,1,0);
-//        glColor3f(0,0,1);
-//        glVertex3f(1,-1,1);
-//        glColor3f(0,1,0);
-//        glVertex3f(1,-1,-1);
-//        //后面
-//        glColor3f(1,0,0);
-//        glVertex3f(0,1,0);
-//        glColor3f(0,1,0);
-//        glVertex3f(1,-1,-1);
-//        glColor3f(0,0,1);
-//        glVertex3f(-1,-1,-1);
-//        //左侧面
-//        glColor3f(1,0,0);
-//        glVertex3f(0,1,0);
-//        glColor3f(0,0,1);
-//        glVertex3f(-1,-1,-1);
-//        glColor3f(0,1,0);
-//        glVertex3f(-1,-1,1);
-//    glEnd();
-//    //底面
-//    glBegin(GL_QUADS);
-//        glColor3f(0,1,0);
-//        glVertex3f(-1,-1,1);
-//        glColor3f(0,0,1);
-//        glVertex3f(-1,-1,-1);
-//        glColor3f(0,1,0);
-//        glVertex3f(1,-1,-1);
-//        glColor3f(0,0,1);
-//        glVertex3f(1,-1,1);
-//    glEnd();
-
     glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
 
     glMatrixMode(GL_MODELVIEW);
@@ -128,7 +65,7 @@ void NeHeWidget::paintGL()
     glRotatef(xRot,1,0,0);
     glRotatef(yRot,0,1,0);
     glRotatef(zRot,0,0,1);
-    //绘制正方体
+    //绘制长方体
     glPushAttrib(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT|GL_CURRENT_BIT);
     glPushMatrix();
 
@@ -179,6 +116,7 @@ void NeHeWidget::paintGL()
     glPopMatrix();
     glPopAttrib();
 
+    //画世界坐标轴
     glPushMatrix();
     glPushAttrib(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT|GL_CURRENT_BIT);
 
@@ -286,13 +224,6 @@ void NeHeWidget::keyPressEvent(QKeyEvent *e)
 void NeHeWidget::loadGLTextures()
 {
     QImage tex,buf;
-//    if(!buf.load(":/myImage/ican"));//"../MyCom-receiveQuat/nehewidget/zhou.jpg"))
-//    {
-//        qWarning("Could not read image file, using single-color instead!");
-//        QImage dummy(128,128,QImage::Format_RGB32);
-//        dummy.fill(Qt::red);
-//        buf = dummy;
-//    }
     QImage myImage1(":/myImage/up.png");
     tex = QGLWidget::convertToGLFormat(myImage1);
     glGenTextures(2,&texture[0]);
@@ -354,6 +285,8 @@ void NeHeWidget::quatToMatrix(float w, float x, float y, float z)
     Matrix4[13] = 0.0f;
     Matrix4[14] = 0.0f;
     Matrix4[15] = 1.0f;
+
+    paintGL();
 }
 
 

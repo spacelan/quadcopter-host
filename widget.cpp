@@ -16,6 +16,8 @@ Widget::Widget(QWidget *parent) :
     refreshTimer = NULL;
     isFirst = true;
     isRun = false;
+    isTextBrowserDisplay = 0b10000000 | DATA_TYPE_QUAT;
+    CMD = COMMAND_TYPE_SEND_QUAT;
     QString date = QLocale(QLocale::C).toDate(QString(__DATE__).replace("  "," "),"MMM d yyyy").toString("yyyy-MM-dd");
     QString time = QString(__TIME__).left(5);
     connect(ui->recieveTextBrowser, SIGNAL(anchorClicked(const QUrl&)),this, SLOT(anchorClickedSlot(const QUrl&)));
@@ -27,16 +29,7 @@ Widget::Widget(QWidget *parent) :
     ui->runpauseBtn->setEnabled(false);
     ui->restartBtn->setEnabled(false);
     ui->recieveTextBrowser->setOpenLinks(false);
-    ui->recieveTextBrowser->moveCursor(QTextCursor::End);
-    ui->recieveTextBrowser->setText(tr("欢迎使用Spacelan's 串口调试助手！\n\nSpacelan's 串口调试助手是Spacelan写的第一个也是目前唯一一个有那么一丢丢实用价值的QT程序\n\nSpacelan's 串口调试助手是某个项目的基础程序\n\nSpacelan's 串口调试助手的代码参考了开源程序QCom"));
-    ui->recieveTextBrowser->moveCursor(QTextCursor::End);
-    ui->recieveTextBrowser->insertHtml(tr("<a href=\"http://www.qter.org/?page_id=203\">参考链接</a><br><br>"));
-    ui->recieveTextBrowser->moveCursor(QTextCursor::End);
-    ui->recieveTextBrowser->insertPlainText("GitHub ");
-    ui->recieveTextBrowser->moveCursor(QTextCursor::End);
-    ui->recieveTextBrowser->insertHtml("<a href=\"https://github.com/spacelan/MyCom.git\">https://github.com/spacelan/MyCom.git</a><br><br>");
-    ui->recieveTextBrowser->moveCursor(QTextCursor::End);
-    ui->recieveTextBrowser->insertPlainText("Copyright (c) 2014 spacelan1993@gmail.com All rights reserved.");
+    displayHelp();
     ui->recieveTextBrowser->moveCursor(QTextCursor::Start);
 
     ui->portnameComboBox->setCurrentIndex(mySettings->value("SERIAL_PORT_NAME",0).toInt());
@@ -74,6 +67,135 @@ void Widget::closeEvent(QCloseEvent *e)
     e->accept();
 }
 
+void Widget::displayQuat(float w, float x, float y, float z)
+{
+    QString str;
+    str.sprintf("% f",w);
+    ui->label_w_display->setText(str);
+    str.sprintf("% f",x);
+    ui->label_x_display->setText(str);
+    str.sprintf("% f",y);
+    ui->label_y_display->setText(str);
+    str.sprintf("% f",z);
+    ui->label_z_display->setText(str);
+}
+
+void Widget::displayEuler(float pitch, float roll, float yaw)
+{
+    QString str;
+    str.sprintf("% f",pitch);
+    ui->label_pitch_display->setText(str);
+    str.sprintf("% f",roll);
+    ui->label_roll_display->setText(str);
+    str.sprintf("% f",yaw);
+    ui->label_yaw_display->setText(str);
+}
+
+void Widget::displayTextBrowser(float w, float x, float y, float z, DATA_TYPE type)
+{
+    if((isTextBrowserDisplay & 0b10000000) == 0) return;
+    if((isTextBrowserDisplay & (unsigned char)DATA_TYPE_QUAT) == 0) return;
+    QString str;
+    switch(type)
+    {
+    case DATA_TYPE_QUAT:
+        str = "Quat: ";
+        break;
+    default:
+        break;
+    }
+    ui->recieveTextBrowser->setTextColor(Qt::black);
+    ui->recieveTextBrowser->moveCursor(QTextCursor::End);
+    ui->recieveTextBrowser->insertPlainText(str);
+
+    str.sprintf("% f % f % f % f\n",w,x,y,z);
+    ui->recieveTextBrowser->moveCursor(QTextCursor::End);
+    ui->recieveTextBrowser->insertPlainText(str);
+}
+
+void Widget::displayTextBrowser(float x, float y, float z, DATA_TYPE type)
+{
+    if((isTextBrowserDisplay & 0b10000000) == 0) return;
+    QString str;
+    switch(type)
+    {
+    case DATA_TYPE_ACCEL:
+        if((isTextBrowserDisplay & (unsigned char)DATA_TYPE_ACCEL) == 0) return;
+        str = "Accel: ";
+        break;
+    case DATA_TYPE_GYRO:
+        if((isTextBrowserDisplay & (unsigned char)DATA_TYPE_GYRO) == 0) return;
+        str = "Gyro: ";
+        break;
+    case DATA_TYPE_EULER:
+        str = "Euler:";
+        break;
+    default:
+        break;
+    }
+    ui->recieveTextBrowser->setTextColor(Qt::black);
+    ui->recieveTextBrowser->moveCursor(QTextCursor::End);
+    ui->recieveTextBrowser->insertPlainText(str);
+
+    str.sprintf("% f % f % f\n",x,y,z);
+    ui->recieveTextBrowser->moveCursor(QTextCursor::End);
+    ui->recieveTextBrowser->insertPlainText(str);
+}
+
+void Widget::displayHelp()
+{
+    ui->recieveTextBrowser->moveCursor(QTextCursor::End);
+    ui->recieveTextBrowser->insertPlainText(tr("欢迎使用Spacelan's 姿态传感系统上位机！\n\nSpacelan's 姿态传感系统上位机是Our-Quadcopter四轴项目的基础程序\n\nSpacelan's 姿态传感系统上位机的代码参考了开源程序QCom"));
+    ui->recieveTextBrowser->moveCursor(QTextCursor::End);
+    ui->recieveTextBrowser->insertHtml(tr("<a href=\"http://www.qter.org/?page_id=203\">参考链接</a><br><br>"));
+    ui->recieveTextBrowser->moveCursor(QTextCursor::End);
+    ui->recieveTextBrowser->insertPlainText("GitHub ");
+    ui->recieveTextBrowser->moveCursor(QTextCursor::End);
+    ui->recieveTextBrowser->insertHtml("<a href=\"https://github.com/spacelan/quadcopter-host\">https://github.com/spacelan/quadcopter-host</a><br><br>");
+    ui->recieveTextBrowser->moveCursor(QTextCursor::End);
+    ui->recieveTextBrowser->insertPlainText("Copyright (c) 2014 spacelan1993@gmail.com All rights reserved.\n");
+    ui->recieveTextBrowser->moveCursor(QTextCursor::End);
+    ui->recieveTextBrowser->insertPlainText("-------------------------------------------------------------------------\n");
+    ui->recieveTextBrowser->moveCursor(QTextCursor::End);
+    ui->recieveTextBrowser->insertPlainText("H!  E!  L!  P!\n");
+    ui->recieveTextBrowser->moveCursor(QTextCursor::End);
+    ui->recieveTextBrowser->insertPlainText(tr("TextBrowser命令:\n"));
+    ui->recieveTextBrowser->moveCursor(QTextCursor::End);
+    ui->recieveTextBrowser->insertPlainText(tr("display\t显示信息\n"));
+    ui->recieveTextBrowser->moveCursor(QTextCursor::End);
+    ui->recieveTextBrowser->insertPlainText(tr("~display\t不显示信息\n"));
+    ui->recieveTextBrowser->moveCursor(QTextCursor::End);
+    ui->recieveTextBrowser->insertPlainText(tr("help\t显示帮助\n"));
+    ui->recieveTextBrowser->moveCursor(QTextCursor::End);
+    ui->recieveTextBrowser->insertPlainText(tr("Receive命令:\n"));
+    ui->recieveTextBrowser->moveCursor(QTextCursor::End);
+    ui->recieveTextBrowser->insertPlainText(tr("quat\t接收四元数\n"));
+    ui->recieveTextBrowser->moveCursor(QTextCursor::End);
+    ui->recieveTextBrowser->insertPlainText(tr("~quat\t不接收四元数\n"));
+    ui->recieveTextBrowser->moveCursor(QTextCursor::End);
+    ui->recieveTextBrowser->insertPlainText(tr("accel\t接收加速度\n"));
+    ui->recieveTextBrowser->moveCursor(QTextCursor::End);
+    ui->recieveTextBrowser->insertPlainText(tr("~accel\t不接收加速度\n"));
+    ui->recieveTextBrowser->moveCursor(QTextCursor::End);
+    ui->recieveTextBrowser->insertPlainText(tr("gyro\t接收角速度\n"));
+    ui->recieveTextBrowser->moveCursor(QTextCursor::End);
+    ui->recieveTextBrowser->insertPlainText(tr("~gyro\t不接收角速度\n"));
+    ui->recieveTextBrowser->moveCursor(QTextCursor::End);
+    ui->recieveTextBrowser->insertPlainText(tr("举个栗子:\n"));
+    ui->recieveTextBrowser->moveCursor(QTextCursor::End);
+    ui->recieveTextBrowser->insertPlainText(tr("TextBrowser help\t即显示本帮助信息\n"));
+}
+
+void Widget::getData(DATA_TYPE type)
+{
+    if(type & DATA_TYPE_QUAT)
+        getQuatData();
+    if(type & DATA_TYPE_ACCEL)
+        getAccelData();
+    if(type & DATA_TYPE_GYRO)
+        getGyroData();
+}
+
 void Widget::getQuatData()
 {
     long quat[4];
@@ -81,6 +203,7 @@ void Widget::getQuatData()
     float w,x,y,z;
 
     if(myCom->getQuat(quat) == 0) return;
+    qDebug()<<"getQuatData";
 
     w = (float)quat[0] ;// q30;
     x = (float)quat[1] ;// q30;
@@ -100,35 +223,38 @@ void Widget::getQuatData()
 
     if(openGLWidget) openGLWidget->quatToMatrix(w,x,y,z);
 
-    QString str;
-    str.sprintf("%f %f %f %f\n",
-                w,x,y,z);
-    ui->recieveTextBrowser->setTextColor(Qt::black);
-    ui->recieveTextBrowser->moveCursor(QTextCursor::End);
-    ui->recieveTextBrowser->insertPlainText(str);
+//    QString str;
+//    str.sprintf("%f %f %f %f\n",
+//                w,x,y,z);
+//    ui->recieveTextBrowser->setTextColor(Qt::black);
+//    ui->recieveTextBrowser->moveCursor(QTextCursor::End);
+//    ui->recieveTextBrowser->insertPlainText(str);
 
-    str.sprintf("%f",w);
-    ui->label_w_display->setText(str);
-    str.sprintf("%f",x);
-    ui->label_x_display->setText(str);
-    str.sprintf("%f",y);
-    ui->label_y_display->setText(str);
-    str.sprintf("%f",z);
-    ui->label_z_display->setText(str);
-    str.sprintf("%f",pitch);
-    ui->label_pitch_display->setText(str);
-    str.sprintf("%f",roll);
-    ui->label_roll_display->setText(str);
-    str.sprintf("%f",yaw);
-    ui->label_yaw_display->setText(str);
+    displayTextBrowser(w,x,y,z,DATA_TYPE_QUAT);
 
-    getAccelData();
+//    str.sprintf("%f",w);
+//    ui->label_w_display->setText(str);
+//    str.sprintf("%f",x);
+//    ui->label_x_display->setText(str);
+//    str.sprintf("%f",y);
+//    ui->label_y_display->setText(str);
+//    str.sprintf("%f",z);
+//    ui->label_z_display->setText(str);
+//    str.sprintf("%f",pitch);
+//    ui->label_pitch_display->setText(str);
+//    str.sprintf("%f",roll);
+//    ui->label_roll_display->setText(str);
+//    str.sprintf("%f",yaw);
+//    ui->label_yaw_display->setText(str);
+
+    displayQuat(w,x,y,z);
+    displayEuler(pitch,roll,yaw);
 }
 
 void Widget::getAccelData()
 {
     short accel[3];
-    const float scaleFactor= 16394.0f;
+    const float scaleFactor= 16384.0;
     float ax,ay,az;
 
     if(myCom->getAccel(accel) == 0) return;
@@ -137,12 +263,22 @@ void Widget::getAccelData()
     ay = (float)accel[1] / scaleFactor;
     az = (float)accel[2] / scaleFactor;
 
-    QString str;
-    str.sprintf("%f %f %f\n",
-                ax,ay,az);
-    ui->recieveTextBrowser->setTextColor(Qt::black);
-    ui->recieveTextBrowser->moveCursor(QTextCursor::End);
-    ui->recieveTextBrowser->insertPlainText(str);
+    displayTextBrowser(ax,ay,az,DATA_TYPE_ACCEL);
+}
+
+void Widget::getGyroData()
+{
+    short gyro[3];
+    const float scaleFactor= 16.4;
+    float gx,gy,gz;
+
+    if(myCom->getGyro(gyro) == 0) return;
+
+    gx = (float)gyro[0] / scaleFactor;
+    gy = (float)gyro[1] / scaleFactor;
+    gz = (float)gyro[2] / scaleFactor;
+
+    displayTextBrowser(gx,gy,gz,DATA_TYPE_GYRO);
 }
 
 void Widget::on_openclosebtn_clicked()
@@ -175,6 +311,7 @@ void Widget::on_openclosebtn_clicked()
     //打开串口准备
     //配置串口
     PortSettings settings;
+    settings.PortName = ui->portnameComboBox->currentText();
     settings.BaudRate = (QSerialPort::BaudRate)ui->baudRateComboBox->currentText().toInt();
     switch(ui->dataBitsComboBox->currentIndex())
     {
@@ -216,13 +353,13 @@ void Widget::on_openclosebtn_clicked()
         settings.StopBits = (QSerialPort::OneStop);
     }
     settings.FlowControl = (QSerialPort::NoFlowControl);
-    myCom = new Communication(ui->portnameComboBox->currentText(),settings);
+    myCom = new Communication();
     //打开串口
-    if(myCom->mySerialPort->open(QIODevice::ReadWrite))
+    if(myCom->openSerialPort(settings))
     {
         refreshTimer = new QTimer;
-        refreshTimer->setInterval(30);
-        connect(refreshTimer,SIGNAL(timeout()),this,SLOT(getQuatData()));
+        refreshTimer->setInterval(40);
+        connect(refreshTimer,SIGNAL(timeout()),this,SLOT(getData()));
         //界面控制
         ui->appName->setText(tr("已打开..."));
         ui->openclosebtn->setText(tr("关闭串口"));
@@ -251,7 +388,23 @@ void Widget::on_sendbtn_clicked()
     ui->sendLineEdit->setFocus();
     QByteArray buf;
     buf = ui->sendLineEdit->text().toAscii();
-    myCom->mySerialPort->write(buf);
+    if(buf == "TextBrowser display") isTextBrowserDisplay |= 0b10000000;
+    else if(buf == "TextBrowser ~display") isTextBrowserDisplay &= 0b01111111;
+    else if(buf == "TextBrowser displayquat") isTextBrowserDisplay |= (unsigned char)DATA_TYPE_QUAT;
+    else if(buf == "TextBrowser ~displayquat") isTextBrowserDisplay &= ~((unsigned char)DATA_TYPE_QUAT);
+    else if(buf == "TextBrowser displayaccel") isTextBrowserDisplay |= (unsigned char)DATA_TYPE_ACCEL;
+    else if(buf == "TextBrowser ~displayaccel") isTextBrowserDisplay &= ~((unsigned char)DATA_TYPE_ACCEL);
+    else if(buf == "TextBrowser displaygyro") isTextBrowserDisplay |= (unsigned char)DATA_TYPE_GYRO;
+    else if(buf == "TextBrowser ~displaygyro") isTextBrowserDisplay &= ~((unsigned char)DATA_TYPE_GYRO);
+    else if(buf == "TextBrowser help") {isTextBrowserDisplay &= 0b01111111; displayHelp();}
+    else if(buf == "Receive quat") CMD |= (unsigned char)COMMAND_TYPE_SEND_QUAT;
+    else if(buf == "Receive ~quat") CMD &= ~((unsigned char)COMMAND_TYPE_SEND_QUAT);
+    else if(buf == "Receive accel") CMD |= (unsigned char)COMMAND_TYPE_SEND_ACCEL;
+    else if(buf == "Receive ~accel") CMD &= ~((unsigned char)COMMAND_TYPE_SEND_ACCEL);
+    else if(buf == "Receive gyro") CMD |= (unsigned char)COMMAND_TYPE_SEND_GYRO;
+    else if(buf == "Receive ~gyro") CMD &= ~((unsigned char)COMMAND_TYPE_SEND_GYRO);
+
+    myCom->sendData(&CMD,DATA_TYPE_COMMAND);
     ui->recieveTextBrowser->setTextColor(Qt::lightGray);
 }
 
@@ -277,16 +430,16 @@ void Widget::on_runpauseBtn_clicked()
 {
     if(isRun)
     {
-        char buf = COMMAND_TYPE_PAUSE;
-        myCom->sendData(&buf,DATA_TYPE_COMMAND);
+        CMD &= ~((unsigned char)COMMAND_TYPE_RUN);
+        myCom->sendData(&CMD,DATA_TYPE_COMMAND);
         ui->runpauseBtn->setText("run");
         refreshTimer->stop();
         isRun = false;
     }
     else
     {
-        char buf = COMMAND_TYPE_RUN;
-        myCom->sendData(&buf,DATA_TYPE_COMMAND);
+        CMD |= COMMAND_TYPE_RUN;
+        myCom->sendData(&CMD,DATA_TYPE_COMMAND);
         ui->runpauseBtn->setText("pause");
         refreshTimer->start();
         isRun = true;

@@ -309,7 +309,7 @@
            <item row="0" column="0">
             <widget class="QLabel" name="label_roll">
              <property name="text">
-              <string>roll =</string>
+              <string>roll  =</string>
              </property>
             </widget>
            </item>
@@ -327,7 +327,7 @@
            <item row="0" column="0">
             <widget class="QLabel" name="label_yaw">
              <property name="text">
-              <string>yaw =</string>
+              <string>yaw   =</string>
              </property>
             </widget>
            </item>

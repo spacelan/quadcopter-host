@@ -14,9 +14,6 @@
 #include "communication.h"
 
 
-//串口读写延时
-#define TIME_OUT 5
-
 namespace Ui {
 class Widget;
 }
@@ -34,18 +31,28 @@ public:
     void closeEvent(QCloseEvent *e);
 
 private:
+    void displayQuat(float w,float x,float y,float z);
+    void displayEuler(float pitch,float roll,float yaw);
+    void displayTextBrowser(float w,float x,float y,float z,DATA_TYPE type = DATA_TYPE_NONE);
+    void displayTextBrowser(float x,float y,float z,DATA_TYPE type = DATA_TYPE_NONE);
+    void displayHelp();
+
     Ui::Widget *ui;
     Communication *myCom;
     NeHeWidget *openGLWidget;
     QTimer *refreshTimer;
     QSettings *mySettings;
+    unsigned char CMD;
+    unsigned char isTextBrowserDisplay;
     bool isFirst;
     bool isRun;
 
+
 private slots:
+    void getData(DATA_TYPE type = DATA_TYPE_ALL);
     void getQuatData();
     void getAccelData();
-    void anchorClickedSlot(const QUrl&);
+    void getGyroData();
 
     void on_openclosebtn_clicked();
     void on_sendbtn_clicked();
@@ -53,6 +60,8 @@ private slots:
     void on_runpauseBtn_clicked();
     void on_restartBtn_clicked();
     void on_displayBTN_clicked();
+
+    void anchorClickedSlot(const QUrl&);
 
 signals:
 

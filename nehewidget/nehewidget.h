@@ -21,7 +21,7 @@ class NeHeWidget : public QGLWidget
     Q_OBJECT
 
 public:
-    explicit NeHeWidget(QGLWidget *parent = 0,bool fs = false);
+    explicit NeHeWidget(QGLWidget *parent = 0);
     ~NeHeWidget();
 
 private:
@@ -39,7 +39,7 @@ protected:
     bool fullscreen;
     GLfloat rTri;
     GLfloat rQuad;
-    QTimer *myTimer;
+    QTimer *refreshTimer;
     GLfloat xRot,yRot,zRot;
     GLuint texture[2];
 
