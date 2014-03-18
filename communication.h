@@ -5,7 +5,8 @@
 
 #include <QObject>
 #include <QTimer>
-#include "qextserialport/qextserialport.h"
+#include <QtSerialPort/QSerialPort>
+#include <QtSerialPort/QSerialPortInfo>
 
 enum DATA_TYPE
 {
@@ -26,6 +27,15 @@ enum COMMAND_TYPE
     COMMAND_TYPE_RESTART = COMMAND_TYPE_PAUSE <<1
 };
 
+struct PortSettings
+{
+    QSerialPort::BaudRate BaudRate;
+    QSerialPort::DataBits DataBits;
+    QSerialPort::Parity Parity;
+    QSerialPort::StopBits StopBits;
+    QSerialPort::FlowControl FlowControl;
+};
+
 class Communication : public QObject
 {
     Q_OBJECT
@@ -39,7 +49,7 @@ public:
     bool getAccel(short *needAccel);
     bool getGyro(short *needGyro);
 
-    QextSerialPort *mySerialPort;
+    QSerialPort *mySerialPort;
 
 signals:
 

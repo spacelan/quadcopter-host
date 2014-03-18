@@ -4,6 +4,7 @@
 #
 #-------------------------------------------------
 
+CONFIG   += serialport
 QT       += core gui
 QT       += opengl
 
@@ -15,15 +16,10 @@ TEMPLATE = app
 
 SOURCES += main.cpp\
         widget.cpp \
-    qextserialport/qextserialport_win.cpp \
-    qextserialport/qextserialport.cpp \
     nehewidget/nehewidget.cpp \
     communication.cpp
 
 HEADERS  += widget.h \
-    qextserialport/qextserialport_p.h \
-    qextserialport/qextserialport_global.h \
-    qextserialport/qextserialport.h \
     nehewidget/nehewidget.h \
     communication.h
 

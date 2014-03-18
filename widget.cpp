@@ -173,52 +173,50 @@ void Widget::on_openclosebtn_clicked()
     }
 
     //打开串口准备
-    QString portName = ui->portnameComboBox->currentText();
-    PortSettings settings;
     //配置串口
-    settings.BaudRate = (BaudRateType)ui->baudRateComboBox->currentText().toInt();
+    PortSettings settings;
+    settings.BaudRate = (QSerialPort::BaudRate)ui->baudRateComboBox->currentText().toInt();
     switch(ui->dataBitsComboBox->currentIndex())
     {
     case 0:
-        settings.DataBits = (DATA_7);
+        settings.DataBits = (QSerialPort::Data7);
         break;
     case 1:
-        settings.DataBits = (DATA_8);
+        settings.DataBits = (QSerialPort::Data8);
         break;
     default:
-        settings.DataBits = (DATA_8);
+        settings.DataBits = (QSerialPort::Data8);
     }
     switch(ui->parityComboBox->currentIndex())
     {
     case 0:
-        settings.Parity = (PAR_NONE);
+        settings.Parity = (QSerialPort::NoParity);
         break;
     case 1:
-        settings.Parity = (PAR_ODD);
+        settings.Parity = (QSerialPort::OddParity);
         break;
     case 2:
-        settings.Parity = (PAR_EVEN);
+        settings.Parity = (QSerialPort::EvenParity);
         break;
     default:
-        settings.Parity = (PAR_NONE);
+        settings.Parity = (QSerialPort::NoParity);
     }
     switch(ui->stopbitsComboBox->currentIndex())
     {
     case 0:
-        settings.StopBits = (STOP_1);
+        settings.StopBits = (QSerialPort::OneStop);
         break;
     case 1:
-        settings.StopBits = (STOP_1_5);
+        settings.StopBits = (QSerialPort::OneAndHalfStop);
         break;
     case 2:
-        settings.StopBits = (STOP_2);
+        settings.StopBits = (QSerialPort::TwoStop);
         break;
     default:
-        settings.StopBits = (STOP_1);
+        settings.StopBits = (QSerialPort::OneStop);
     }
-    settings.FlowControl = (FLOW_OFF);
-    settings.Timeout_Millisec = (TIME_OUT);
-    myCom = new Communication(portName,settings);
+    settings.FlowControl = (QSerialPort::NoFlowControl);
+    myCom = new Communication(ui->portnameComboBox->currentText(),settings);
     //打开串口
     if(myCom->mySerialPort->open(QIODevice::ReadWrite))
     {
@@ -238,7 +236,7 @@ void Widget::on_openclosebtn_clicked()
     {
         delete myCom;
         myCom = NULL;
-        QMessageBox::critical(this, tr("打开失败"), tr("未能打开串口 ") + portName + tr("\n该串口设备不存在或已被占用"), QMessageBox::Ok);
+        QMessageBox::critical(this, tr("打开失败"), tr("未能打开串口 ") + ui->portnameComboBox->currentText() + tr("\n该串口设备不存在或已被占用"), QMessageBox::Ok);
         return;
     }
 }

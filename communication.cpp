@@ -14,26 +14,22 @@ enum GET_DATA_STATE
 
 uint16_t math_crc16(uint16_t crc,const void * data,uint16_t len);
 
-Communication::Communication(QObject *parent) :
-    QObject(parent)
-{
-    mySerialPort = new QextSerialPort;
-    refreshTimer = new QTimer();
-    refreshTimer->setInterval(10);
-    refreshTimer->start();
-    connect(refreshTimer,SIGNAL(timeout()),this,SLOT(getData()));
-    isDataReady = DATA_TYPE_NONE;
-}
-
 Communication::Communication(const QString &name, const PortSettings &settings, QObject *parent) :
     QObject(parent)
 {
-    mySerialPort = new QextSerialPort(name,settings);
+    mySerialPort = new QSerialPort(name,this);
+    mySerialPort->setBaudRate(settings.BaudRate);
+    mySerialPort->setDataBits(settings.DataBits);
+    mySerialPort->setParity(settings.Parity);
+    mySerialPort->setStopBits(settings.StopBits);
+    mySerialPort->setFlowControl(settings.FlowControl);
+    connect(mySerialPort,SIGNAL(readyRead()),this,SLOT(getData()));
+
     refreshTimer = new QTimer();
     refreshTimer->setInterval(5);
     refreshTimer->start();
 //    connect(refreshTimer,SIGNAL(timeout()),this,SLOT(getData()));
-    connect(mySerialPort,SIGNAL(readyRead()),this,SLOT(getData()));
+
     isDataReady = false;
 
     dataLength[DATA_TYPE_NONE] = 0;
@@ -100,11 +96,6 @@ void Communication::getData()
     static char type = DATA_TYPE_NONE;
     static int length = 0;
 
-//    if(mySerialPort->bytesAvailable() > 256)
-//    {
-//        mySerialPort->flush();
-//        state =NEED_AA;
-//    }
     if(state == NEED_AA)
     {
         qDebug()<<"NEED_AA";
@@ -137,11 +128,11 @@ void Communication::getData()
         if(i>=6)
         {
             qDebug()<<"TYPE_WRONG "<<(int)byte;
-            qDebug()<<mySerialPort->bytesAvailable();
-            mySerialPort->flush();
-//            if(byte == (char)0xaa)
-//                state = NEED_55;
-//            else
+//            qDebug()<<mySerialPort->bytesAvailable();
+//            mySerialPort->clear();
+            if(byte == (char)0xaa)
+                state = NEED_55;
+            else
                 state = NEED_AA;
             return;
         }
@@ -160,10 +151,11 @@ void Communication::getData()
         if(crc != math_crc16(0,temp,length))
         {
             qDebug()<<"CRC WRONGGGGGGGG "<<crc<<"!="<<math_crc16(0,temp,length);
-            qDebug()<<mySerialPort->bytesAvailable();
+            mySerialPort->clear();
+//            qDebug()<<mySerialPort->bytesAvailable();
 //            mySerialPort->flush();
-            mySerialPort->close();
-            mySerialPort->open(QIODevice::ReadWrite);
+//            mySerialPort->close();
+//            mySerialPort->open(QIODevice::ReadWrite);
             state = NEED_AA;
             return;
         }
