@@ -1,6 +1,6 @@
 //     Copyright (c) 2014 spacelan1993@gmail.com All rights reserved.
 
-#include "communication.h"
+#include "communication/communication.h"
 #include <QEventLoop>
 #include <QDebug>
 

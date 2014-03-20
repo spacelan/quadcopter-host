@@ -11,7 +11,7 @@
 #include <QCloseEvent>
 #include <QSettings>
 #include "nehewidget/nehewidget.h"
-#include "communication.h"
+#include "communication/communication.h"
 
 
 namespace Ui {
@@ -44,7 +44,6 @@ private:
     QSettings *mySettings;
     unsigned char CMD;
     unsigned char isTextBrowserDisplay;
-    bool isFirst;
     bool isRun;
 
 
@@ -62,6 +61,7 @@ private slots:
     void on_displayBTN_clicked();
 
     void anchorClickedSlot(const QUrl&);
+    void on_sendLineEdit_returnPressed();
 
 signals:
 

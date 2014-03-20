@@ -9,6 +9,9 @@ int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
     QTextCodec::setCodecForTr(QTextCodec::codecForName("utf8"));
+    QTextCodec::setCodecForLocale(QTextCodec::codecForName("utf8"));
+    QTextCodec::setCodecForCStrings(QTextCodec::codecForName("utf8"));
+
     Q_INIT_RESOURCE(image);
     QApplication::setOrganizationName("Spacelan");
     QApplication::setApplicationName("quadcopter-host");

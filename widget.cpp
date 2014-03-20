@@ -2,6 +2,9 @@
 
 #include "widget.h"
 #include "ui_widget.h"
+#include "quaternion/quaternion.h"
+#include <QFile>
+#include <QTextStream>
 
 float math_rsqrt(float number);
 
@@ -14,7 +17,6 @@ Widget::Widget(QWidget *parent) :
     myCom = NULL;
     openGLWidget = NULL;
     refreshTimer = NULL;
-    isFirst = true;
     isRun = false;
     isTextBrowserDisplay = 0b10000000 | DATA_TYPE_QUAT;
     CMD = COMMAND_TYPE_SEND_QUAT;
@@ -144,46 +146,66 @@ void Widget::displayTextBrowser(float x, float y, float z, DATA_TYPE type)
 
 void Widget::displayHelp()
 {
-    ui->recieveTextBrowser->moveCursor(QTextCursor::End);
-    ui->recieveTextBrowser->insertPlainText(tr("欢迎使用Spacelan's 姿态传感系统上位机！\n\nSpacelan's 姿态传感系统上位机是Our-Quadcopter四轴项目的基础程序\n\nSpacelan's 姿态传感系统上位机的代码参考了开源程序QCom"));
-    ui->recieveTextBrowser->moveCursor(QTextCursor::End);
-    ui->recieveTextBrowser->insertHtml(tr("<a href=\"http://www.qter.org/?page_id=203\">参考链接</a><br><br>"));
-    ui->recieveTextBrowser->moveCursor(QTextCursor::End);
-    ui->recieveTextBrowser->insertPlainText("GitHub ");
-    ui->recieveTextBrowser->moveCursor(QTextCursor::End);
-    ui->recieveTextBrowser->insertHtml("<a href=\"https://github.com/spacelan/quadcopter-host\">https://github.com/spacelan/quadcopter-host</a><br><br>");
-    ui->recieveTextBrowser->moveCursor(QTextCursor::End);
-    ui->recieveTextBrowser->insertPlainText("Copyright (c) 2014 spacelan1993@gmail.com All rights reserved.\n");
-    ui->recieveTextBrowser->moveCursor(QTextCursor::End);
-    ui->recieveTextBrowser->insertPlainText("-------------------------------------------------------------------------\n");
-    ui->recieveTextBrowser->moveCursor(QTextCursor::End);
-    ui->recieveTextBrowser->insertPlainText("H!  E!  L!  P!\n");
-    ui->recieveTextBrowser->moveCursor(QTextCursor::End);
-    ui->recieveTextBrowser->insertPlainText(tr("TextBrowser命令:\n"));
-    ui->recieveTextBrowser->moveCursor(QTextCursor::End);
-    ui->recieveTextBrowser->insertPlainText(tr("display\t显示信息\n"));
-    ui->recieveTextBrowser->moveCursor(QTextCursor::End);
-    ui->recieveTextBrowser->insertPlainText(tr("~display\t不显示信息\n"));
-    ui->recieveTextBrowser->moveCursor(QTextCursor::End);
-    ui->recieveTextBrowser->insertPlainText(tr("help\t显示帮助\n"));
-    ui->recieveTextBrowser->moveCursor(QTextCursor::End);
-    ui->recieveTextBrowser->insertPlainText(tr("Receive命令:\n"));
-    ui->recieveTextBrowser->moveCursor(QTextCursor::End);
-    ui->recieveTextBrowser->insertPlainText(tr("quat\t接收四元数\n"));
-    ui->recieveTextBrowser->moveCursor(QTextCursor::End);
-    ui->recieveTextBrowser->insertPlainText(tr("~quat\t不接收四元数\n"));
-    ui->recieveTextBrowser->moveCursor(QTextCursor::End);
-    ui->recieveTextBrowser->insertPlainText(tr("accel\t接收加速度\n"));
-    ui->recieveTextBrowser->moveCursor(QTextCursor::End);
-    ui->recieveTextBrowser->insertPlainText(tr("~accel\t不接收加速度\n"));
-    ui->recieveTextBrowser->moveCursor(QTextCursor::End);
-    ui->recieveTextBrowser->insertPlainText(tr("gyro\t接收角速度\n"));
-    ui->recieveTextBrowser->moveCursor(QTextCursor::End);
-    ui->recieveTextBrowser->insertPlainText(tr("~gyro\t不接收角速度\n"));
-    ui->recieveTextBrowser->moveCursor(QTextCursor::End);
-    ui->recieveTextBrowser->insertPlainText(tr("举个栗子:\n"));
-    ui->recieveTextBrowser->moveCursor(QTextCursor::End);
-    ui->recieveTextBrowser->insertPlainText(tr("TextBrowser help\t即显示本帮助信息\n"));
+    QFile myFile(":/myWidget/readme.txt");
+    if(myFile.open(QIODevice::ReadOnly))
+    {
+        QTextStream textIn(&myFile);
+        QString str = textIn.readAll();
+        ui->recieveTextBrowser->moveCursor(QTextCursor::End);
+        ui->recieveTextBrowser->insertHtml(str);
+        ui->recieveTextBrowser->moveCursor(QTextCursor::End);
+    }
+    myFile.close();
+    myFile.setFileName(":/myWidget/help.txt");
+    if(myFile.open(QIODevice::ReadOnly))
+    {
+        QTextStream textIn(&myFile);
+        QString str = textIn.readAll();
+        ui->recieveTextBrowser->moveCursor(QTextCursor::End);
+        ui->recieveTextBrowser->insertPlainText(str);
+        ui->recieveTextBrowser->moveCursor(QTextCursor::End);
+    }
+    myFile.close();
+//    ui->recieveTextBrowser->moveCursor(QTextCursor::End);
+//    ui->recieveTextBrowser->insertPlainText(tr("欢迎使用Spacelan's 姿态传感系统上位机！\n\nSpacelan's 姿态传感系统上位机是Our-Quadcopter四轴项目的基础程序\n\nSpacelan's 姿态传感系统上位机的代码参考了开源程序QCom"));
+//    ui->recieveTextBrowser->moveCursor(QTextCursor::End);
+//    ui->recieveTextBrowser->insertHtml(tr("<a href=\"http://www.qter.org/?page_id=203\">参考链接</a><br><br>"));
+//    ui->recieveTextBrowser->moveCursor(QTextCursor::End);
+//    ui->recieveTextBrowser->insertPlainText("GitHub ");
+//    ui->recieveTextBrowser->moveCursor(QTextCursor::End);
+//    ui->recieveTextBrowser->insertHtml("<a href=\"https://github.com/spacelan/quadcopter-host\">https://github.com/spacelan/quadcopter-host</a><br><br>");
+//    ui->recieveTextBrowser->moveCursor(QTextCursor::End);
+//    ui->recieveTextBrowser->insertPlainText("Copyright (c) 2014 spacelan1993@gmail.com All rights reserved.\n");
+//    ui->recieveTextBrowser->moveCursor(QTextCursor::End);
+//    ui->recieveTextBrowser->insertPlainText("-------------------------------------------------------------------------\n");
+//    ui->recieveTextBrowser->moveCursor(QTextCursor::End);
+//    ui->recieveTextBrowser->insertPlainText("H!  E!  L!  P!\n");
+//    ui->recieveTextBrowser->moveCursor(QTextCursor::End);
+//    ui->recieveTextBrowser->insertPlainText(tr("TextBrowser命令:\n"));
+//    ui->recieveTextBrowser->moveCursor(QTextCursor::End);
+//    ui->recieveTextBrowser->insertPlainText(tr("display\t显示信息\n"));
+//    ui->recieveTextBrowser->moveCursor(QTextCursor::End);
+//    ui->recieveTextBrowser->insertPlainText(tr("~display\t不显示信息\n"));
+//    ui->recieveTextBrowser->moveCursor(QTextCursor::End);
+//    ui->recieveTextBrowser->insertPlainText(tr("help\t显示帮助\n"));
+//    ui->recieveTextBrowser->moveCursor(QTextCursor::End);
+//    ui->recieveTextBrowser->insertPlainText(tr("Receive命令:\n"));
+//    ui->recieveTextBrowser->moveCursor(QTextCursor::End);
+//    ui->recieveTextBrowser->insertPlainText(tr("quat\t接收四元数\n"));
+//    ui->recieveTextBrowser->moveCursor(QTextCursor::End);
+//    ui->recieveTextBrowser->insertPlainText(tr("~quat\t不接收四元数\n"));
+//    ui->recieveTextBrowser->moveCursor(QTextCursor::End);
+//    ui->recieveTextBrowser->insertPlainText(tr("accel\t接收加速度\n"));
+//    ui->recieveTextBrowser->moveCursor(QTextCursor::End);
+//    ui->recieveTextBrowser->insertPlainText(tr("~accel\t不接收加速度\n"));
+//    ui->recieveTextBrowser->moveCursor(QTextCursor::End);
+//    ui->recieveTextBrowser->insertPlainText(tr("gyro\t接收角速度\n"));
+//    ui->recieveTextBrowser->moveCursor(QTextCursor::End);
+//    ui->recieveTextBrowser->insertPlainText(tr("~gyro\t不接收角速度\n"));
+//    ui->recieveTextBrowser->moveCursor(QTextCursor::End);
+//    ui->recieveTextBrowser->insertPlainText(tr("举个栗子:\n"));
+//    ui->recieveTextBrowser->moveCursor(QTextCursor::End);
+//    ui->recieveTextBrowser->insertPlainText(tr("TextBrowser help\t即显示本帮助信息\n"));
 }
 
 void Widget::getData(DATA_TYPE type)
@@ -195,7 +217,7 @@ void Widget::getData(DATA_TYPE type)
     if(type & DATA_TYPE_GYRO)
         getGyroData();
 }
-
+/*
 void Widget::getQuatData()
 {
     long quat[4];
@@ -250,6 +272,25 @@ void Widget::getQuatData()
     displayQuat(w,x,y,z);
     displayEuler(pitch,roll,yaw);
 }
+*/
+void Widget::getQuatData()
+{
+    long quat[4];
+    if(myCom->getQuat(quat) == 0) return;
+    qDebug()<<"getQuatData";
+
+    Quaternion q((float)quat[0],(float)quat[1],(float)quat[2],(float)quat[3]);
+    q.Normalize();
+
+    float pitch,roll,yaw;
+    q.ToEuler(pitch,roll,yaw);
+
+    if(openGLWidget) q.ToMatrix4(openGLWidget->Matrix4);
+
+    displayQuat(q.w,q.x,q.y,q.z);
+    displayEuler(pitch,roll,yaw);
+    displayTextBrowser(q.w,q.x,q.y,q.z,DATA_TYPE_QUAT);
+}
 
 void Widget::getAccelData()
 {
@@ -283,13 +324,6 @@ void Widget::getGyroData()
 
 void Widget::on_openclosebtn_clicked()
 {
-    //启动后起一次打开，清除屏幕
-    if(isFirst)
-    {
-        ui->recieveTextBrowser->clear();
-        isFirst = false;
-    }
-
     //如果已经开启，关闭串口
     if(myCom)
     {
@@ -478,4 +512,9 @@ float math_rsqrt(float number)
     y  = y * ( threehalfs - ( x2 * y * y ) );   // 2nd iteration, this can be removed（第二次迭代，可以删除）
 
     return y;
+}
+
+void Widget::on_sendLineEdit_returnPressed()
+{
+    on_sendbtn_clicked();
 }

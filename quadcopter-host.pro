@@ -17,14 +17,17 @@ TEMPLATE = app
 SOURCES += main.cpp\
         widget.cpp \
     nehewidget/nehewidget.cpp \
-    communication.cpp
+    quaternion/quaternion.cpp \
+    communication/communication.cpp
 
 HEADERS  += widget.h \
     nehewidget/nehewidget.h \
-    communication.h
+    quaternion/quaternion.h \
+    communication/communication.h
 
 FORMS    += widget.ui \
     nehewidget/nehewidget.ui
 
 RESOURCES += \
-    nehewidget/image.qrc
+    nehewidget/image.qrc \
+    widget.qrc

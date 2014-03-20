@@ -1,0 +1,14 @@
+﻿H!      E!      L!      P!
+TextBrowser命令:
+display             显示信息
+~display            不显示信息
+help                显示帮助
+Receive命令:
+quat                接收四元数
+~quat               不接收四元数
+accel               接收加速度
+~accel              不接收加速度
+gyro                接收角速度
+~gyro               不接收角速度
+举个栗子:
+TextBrowser help    即显示本帮助信息

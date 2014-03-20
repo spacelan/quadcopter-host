@@ -1,0 +1,6 @@
+<RCC>
+    <qresource prefix="/myWidget">
+        <file>readme.txt</file>
+        <file>help.txt</file>
+    </qresource>
+</RCC>

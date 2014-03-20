@@ -24,9 +24,9 @@ public:
     explicit NeHeWidget(QGLWidget *parent = 0);
     ~NeHeWidget();
 
+    float Matrix4[16];
 private:
     Ui::NeHeWidget *ui;
-    float Matrix4[16];
 
 protected:
     void initializeGL();
