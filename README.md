@@ -7,4 +7,4 @@ quadcopter-host
 [https://github.com/spacelan/MPU6050ForStm32](https://github.com/spacelan/MPU6050ForStm32)<br />  
 渣像素
 --
-![image](https://github.com/spacelan/MyCom-receiveQuat/raw/master/IMG_20140222_113035.jpg "image")
+![image](https://github.com/spacelan/quadcopter-host/raw/master/IMG_20140222_113035.jpg "image")
