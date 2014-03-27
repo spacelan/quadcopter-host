@@ -8,7 +8,7 @@
 #include <QMessageBox>
 #include <QTimer>
 #include <windows.h>
-#include <QCloseEvent>
+//#include <QCloseEvent>
 #include <QSettings>
 #include "nehewidget/nehewidget.h"
 #include "communication/communication.h"
@@ -28,7 +28,7 @@ public:
     
 
     void setComboxEnabled(bool);
-    void closeEvent(QCloseEvent *e);
+//    void closeEvent(QCloseEvent *e);
 
 private:
     void displayQuat(float w,float x,float y,float z);

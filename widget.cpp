@@ -43,6 +43,12 @@ Widget::Widget(QWidget *parent) :
 
 Widget::~Widget()
 {
+    mySettings->setValue("SERIAL_PORT_NAME",ui->portnameComboBox->currentIndex());
+    mySettings->setValue("SERIAL_BAUD_RATE",ui->baudRateComboBox->currentIndex());
+    mySettings->setValue("SERIAL_DATA_BITS",ui->dataBitsComboBox->currentIndex());
+    mySettings->setValue("SERIAL_PARITY",ui->parityComboBox->currentIndex());
+    mySettings->setValue("SERIAL_STOP_BITS",ui->stopbitsComboBox->currentIndex());
+
     delete refreshTimer;
     delete openGLWidget;
     delete myCom;
@@ -59,15 +65,15 @@ void Widget::setComboxEnabled(bool b)
     ui->stopbitsComboBox->setEnabled(b);
 }
 
-void Widget::closeEvent(QCloseEvent *e)
-{
-    mySettings->setValue("SERIAL_PORT_NAME",ui->portnameComboBox->currentIndex());
-    mySettings->setValue("SERIAL_BAUD_RATE",ui->baudRateComboBox->currentIndex());
-    mySettings->setValue("SERIAL_DATA_BITS",ui->dataBitsComboBox->currentIndex());
-    mySettings->setValue("SERIAL_PARITY",ui->parityComboBox->currentIndex());
-    mySettings->setValue("SERIAL_STOP_BITS",ui->stopbitsComboBox->currentIndex());
-    e->accept();
-}
+//void Widget::closeEvent(QCloseEvent *e)
+//{
+//    mySettings->setValue("SERIAL_PORT_NAME",ui->portnameComboBox->currentIndex());
+//    mySettings->setValue("SERIAL_BAUD_RATE",ui->baudRateComboBox->currentIndex());
+//    mySettings->setValue("SERIAL_DATA_BITS",ui->dataBitsComboBox->currentIndex());
+//    mySettings->setValue("SERIAL_PARITY",ui->parityComboBox->currentIndex());
+//    mySettings->setValue("SERIAL_STOP_BITS",ui->stopbitsComboBox->currentIndex());
+//    e->accept();
+//}
 
 void Widget::displayQuat(float w, float x, float y, float z)
 {
