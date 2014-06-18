@@ -3,10 +3,6 @@
 #include "widget.h"
 #include "ui_widget.h"
 #include "quaternion/quaternion.h"
-#include <QFile>
-#include <QTextStream>
-
-float math_rsqrt(float number);
 
 Widget::Widget(QWidget *parent) :
     QWidget(parent),
@@ -18,7 +14,8 @@ Widget::Widget(QWidget *parent) :
     openGLWidget = NULL;
     refreshTimer = NULL;
     isRun = false;
-    isTextBrowserDisplay = 0b10000000 | DATA_TYPE_QUAT;
+    isDisplayText = true;
+    isTextBrowserDisplay = DATA_TYPE_QUAT;
     CMD = COMMAND_TYPE_SEND_QUAT;
     QString date = QLocale(QLocale::C).toDate(QString(__DATE__).replace("  "," "),"MMM d yyyy").toString("yyyy-MM-dd");
     QString time = QString(__TIME__).left(5);
@@ -101,13 +98,17 @@ void Widget::displayEuler(float pitch, float roll, float yaw)
 
 void Widget::displayTextBrowser(float w, float x, float y, float z, DATA_TYPE type)
 {
-    if((isTextBrowserDisplay & 0b10000000) == 0) return;
-    if((isTextBrowserDisplay & (unsigned char)DATA_TYPE_QUAT) == 0) return;
+    if(!isDisplayText) return;
     QString str;
     switch(type)
     {
     case DATA_TYPE_QUAT:
+        if((isTextBrowserDisplay & (unsigned char)DATA_TYPE_QUAT) == 0) return;
         str = "Quat: ";
+        break;
+    case DATA_TYPE_THROTTLE:
+        if((isTextBrowserDisplay & (unsigned char)DATA_TYPE_THROTTLE) == 0) return;
+        str = "Throttle: ";
         break;
     default:
         break;
@@ -123,7 +124,7 @@ void Widget::displayTextBrowser(float w, float x, float y, float z, DATA_TYPE ty
 
 void Widget::displayTextBrowser(float x, float y, float z, DATA_TYPE type)
 {
-    if((isTextBrowserDisplay & 0b10000000) == 0) return;
+    if(!isDisplayText) return;
     QString str;
     switch(type)
     {
@@ -136,6 +137,7 @@ void Widget::displayTextBrowser(float x, float y, float z, DATA_TYPE type)
         str = "Gyro: ";
         break;
     case DATA_TYPE_EULER:
+        if((isTextBrowserDisplay & (unsigned char)DATA_TYPE_EULER) == 0) return;
         str = "Euler:";
         break;
     default:
@@ -172,46 +174,6 @@ void Widget::displayHelp()
         ui->recieveTextBrowser->moveCursor(QTextCursor::End);
     }
     myFile.close();
-//    ui->recieveTextBrowser->moveCursor(QTextCursor::End);
-//    ui->recieveTextBrowser->insertPlainText(tr("欢迎使用Spacelan's 姿态传感系统上位机！\n\nSpacelan's 姿态传感系统上位机是Our-Quadcopter四轴项目的基础程序\n\nSpacelan's 姿态传感系统上位机的代码参考了开源程序QCom"));
-//    ui->recieveTextBrowser->moveCursor(QTextCursor::End);
-//    ui->recieveTextBrowser->insertHtml(tr("<a href=\"http://www.qter.org/?page_id=203\">参考链接</a><br><br>"));
-//    ui->recieveTextBrowser->moveCursor(QTextCursor::End);
-//    ui->recieveTextBrowser->insertPlainText("GitHub ");
-//    ui->recieveTextBrowser->moveCursor(QTextCursor::End);
-//    ui->recieveTextBrowser->insertHtml("<a href=\"https://github.com/spacelan/quadcopter-host\">https://github.com/spacelan/quadcopter-host</a><br><br>");
-//    ui->recieveTextBrowser->moveCursor(QTextCursor::End);
-//    ui->recieveTextBrowser->insertPlainText("Copyright (c) 2014 spacelan1993@gmail.com All rights reserved.\n");
-//    ui->recieveTextBrowser->moveCursor(QTextCursor::End);
-//    ui->recieveTextBrowser->insertPlainText("-------------------------------------------------------------------------\n");
-//    ui->recieveTextBrowser->moveCursor(QTextCursor::End);
-//    ui->recieveTextBrowser->insertPlainText("H!  E!  L!  P!\n");
-//    ui->recieveTextBrowser->moveCursor(QTextCursor::End);
-//    ui->recieveTextBrowser->insertPlainText(tr("TextBrowser命令:\n"));
-//    ui->recieveTextBrowser->moveCursor(QTextCursor::End);
-//    ui->recieveTextBrowser->insertPlainText(tr("display\t显示信息\n"));
-//    ui->recieveTextBrowser->moveCursor(QTextCursor::End);
-//    ui->recieveTextBrowser->insertPlainText(tr("~display\t不显示信息\n"));
-//    ui->recieveTextBrowser->moveCursor(QTextCursor::End);
-//    ui->recieveTextBrowser->insertPlainText(tr("help\t显示帮助\n"));
-//    ui->recieveTextBrowser->moveCursor(QTextCursor::End);
-//    ui->recieveTextBrowser->insertPlainText(tr("Receive命令:\n"));
-//    ui->recieveTextBrowser->moveCursor(QTextCursor::End);
-//    ui->recieveTextBrowser->insertPlainText(tr("quat\t接收四元数\n"));
-//    ui->recieveTextBrowser->moveCursor(QTextCursor::End);
-//    ui->recieveTextBrowser->insertPlainText(tr("~quat\t不接收四元数\n"));
-//    ui->recieveTextBrowser->moveCursor(QTextCursor::End);
-//    ui->recieveTextBrowser->insertPlainText(tr("accel\t接收加速度\n"));
-//    ui->recieveTextBrowser->moveCursor(QTextCursor::End);
-//    ui->recieveTextBrowser->insertPlainText(tr("~accel\t不接收加速度\n"));
-//    ui->recieveTextBrowser->moveCursor(QTextCursor::End);
-//    ui->recieveTextBrowser->insertPlainText(tr("gyro\t接收角速度\n"));
-//    ui->recieveTextBrowser->moveCursor(QTextCursor::End);
-//    ui->recieveTextBrowser->insertPlainText(tr("~gyro\t不接收角速度\n"));
-//    ui->recieveTextBrowser->moveCursor(QTextCursor::End);
-//    ui->recieveTextBrowser->insertPlainText(tr("举个栗子:\n"));
-//    ui->recieveTextBrowser->moveCursor(QTextCursor::End);
-//    ui->recieveTextBrowser->insertPlainText(tr("TextBrowser help\t即显示本帮助信息\n"));
 }
 
 void Widget::getData(DATA_TYPE type)
@@ -222,6 +184,8 @@ void Widget::getData(DATA_TYPE type)
         getAccelData();
     if(type & DATA_TYPE_GYRO)
         getGyroData();
+    if(type & DATA_TYPE_THROTTLE)
+        getThrottleData();
 }
 /*
 void Widget::getQuatData()
@@ -328,6 +292,13 @@ void Widget::getGyroData()
     displayTextBrowser(gx,gy,gz,DATA_TYPE_GYRO);
 }
 
+void Widget::getThrottleData()
+{
+    uint8_t throttle[4];
+    if(myCom->getThrottle(throttle) == 0) return;
+    displayTextBrowser(throttle[0],throttle[1],throttle[2],throttle[3],DATA_TYPE_THROTTLE);
+}
+
 void Widget::on_openclosebtn_clicked()
 {
     //如果已经开启，关闭串口
@@ -428,21 +399,26 @@ void Widget::on_sendbtn_clicked()
     ui->sendLineEdit->setFocus();
     QByteArray buf;
     buf = ui->sendLineEdit->text().toAscii();
-    if(buf == "TextBrowser display") isTextBrowserDisplay |= 0b10000000;
-    else if(buf == "TextBrowser ~display") isTextBrowserDisplay &= 0b01111111;
-    else if(buf == "TextBrowser displayquat") isTextBrowserDisplay |= (unsigned char)DATA_TYPE_QUAT;
-    else if(buf == "TextBrowser ~displayquat") isTextBrowserDisplay &= ~((unsigned char)DATA_TYPE_QUAT);
-    else if(buf == "TextBrowser displayaccel") isTextBrowserDisplay |= (unsigned char)DATA_TYPE_ACCEL;
-    else if(buf == "TextBrowser ~displayaccel") isTextBrowserDisplay &= ~((unsigned char)DATA_TYPE_ACCEL);
-    else if(buf == "TextBrowser displaygyro") isTextBrowserDisplay |= (unsigned char)DATA_TYPE_GYRO;
-    else if(buf == "TextBrowser ~displaygyro") isTextBrowserDisplay &= ~((unsigned char)DATA_TYPE_GYRO);
-    else if(buf == "TextBrowser help") {isTextBrowserDisplay &= 0b01111111; displayHelp();}
-    else if(buf == "Receive quat") CMD |= (unsigned char)COMMAND_TYPE_SEND_QUAT;
-    else if(buf == "Receive ~quat") CMD &= ~((unsigned char)COMMAND_TYPE_SEND_QUAT);
-    else if(buf == "Receive accel") CMD |= (unsigned char)COMMAND_TYPE_SEND_ACCEL;
-    else if(buf == "Receive ~accel") CMD &= ~((unsigned char)COMMAND_TYPE_SEND_ACCEL);
-    else if(buf == "Receive gyro") CMD |= (unsigned char)COMMAND_TYPE_SEND_GYRO;
-    else if(buf == "Receive ~gyro") CMD &= ~((unsigned char)COMMAND_TYPE_SEND_GYRO);
+    if(buf == "-d display") isDisplayText = true;
+    else if(buf == "-d ~display") isDisplayText = false;
+    else if(buf == "-d quat") isTextBrowserDisplay |= (unsigned char)DATA_TYPE_QUAT;
+    else if(buf == "-d ~quat") isTextBrowserDisplay &= ~((unsigned char)DATA_TYPE_QUAT);
+    else if(buf == "-d accel") isTextBrowserDisplay |= (unsigned char)DATA_TYPE_ACCEL;
+    else if(buf == "-d ~accel") isTextBrowserDisplay &= ~((unsigned char)DATA_TYPE_ACCEL);
+    else if(buf == "-d gyro") isTextBrowserDisplay |= (unsigned char)DATA_TYPE_GYRO;
+    else if(buf == "-d ~gyro") isTextBrowserDisplay &= ~((unsigned char)DATA_TYPE_GYRO);
+    else if(buf == "-d throttle") isTextBrowserDisplay |= (unsigned char)DATA_TYPE_THROTTLE;
+    else if(buf == "-d ~throttle") isTextBrowserDisplay &= ~((unsigned char)DATA_TYPE_THROTTLE);
+    else if(buf == "-d help") {isTextBrowserDisplay &= 0b01111111; displayHelp();}
+    else if(buf == "-r quat") CMD |= (unsigned char)COMMAND_TYPE_SEND_QUAT;
+    else if(buf == "-r ~quat") CMD &= ~((unsigned char)COMMAND_TYPE_SEND_QUAT);
+    else if(buf == "-r accel") CMD |= (unsigned char)COMMAND_TYPE_SEND_ACCEL;
+    else if(buf == "-r ~accel") CMD &= ~((unsigned char)COMMAND_TYPE_SEND_ACCEL);
+    else if(buf == "-r gyro") CMD |= (unsigned char)COMMAND_TYPE_SEND_GYRO;
+    else if(buf == "-r ~gyro") CMD &= ~((unsigned char)COMMAND_TYPE_SEND_GYRO);
+    else if(buf == "-r throttle") CMD |= (unsigned char)COMMAND_TYPE_SEND_THROTTLE;
+    else if(buf == "-r ~throttle") CMD &= ~((unsigned char)COMMAND_TYPE_SEND_THROTTLE);
+    else {ui->recieveTextBrowser->insertPlainText("w~r~o~n~g!!!\n"); ui->recieveTextBrowser->moveCursor(QTextCursor::End); return;}
 
     myCom->sendData(&CMD,DATA_TYPE_COMMAND);
     ui->recieveTextBrowser->setTextColor(Qt::lightGray);
@@ -503,24 +479,8 @@ void Widget::on_displayBTN_clicked()
     }
 }
 
-float math_rsqrt(float number)
-{
-    long i;
-    float x2, y;
-    const float threehalfs = 1.5F;
-
-    x2 = number * 0.5F;
-    y  = number;
-    i  = * ( long * ) &y;                       // evil floating point bit level hacking（对浮点数的邪恶位级hack）
-    i  = 0x5f3759df - ( i >> 1 );               // what the fuck?（这他妈的是怎么回事？）
-    y  = * ( float * ) &i;
-    y  = y * ( threehalfs - ( x2 * y * y ) );   // 1st iteration （第一次牛顿迭代）
-    y  = y * ( threehalfs - ( x2 * y * y ) );   // 2nd iteration, this can be removed（第二次迭代，可以删除）
-
-    return y;
-}
-
 void Widget::on_sendLineEdit_returnPressed()
 {
     on_sendbtn_clicked();
 }
+

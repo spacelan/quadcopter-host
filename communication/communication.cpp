@@ -18,13 +18,14 @@ Communication::Communication(QObject *parent) :
     QObject(parent)
 {
     mySerialPort = NULL;
-    refreshTimer = NULL;
+    refreshTimer = NULL;//目前没用到
     isDataReady = 0;
     dataLength[DATA_TYPE_NONE] = 0;
     dataLength[DATA_TYPE_QUAT] = 16;
     dataLength[DATA_TYPE_ACCEL] = 6;
     dataLength[DATA_TYPE_GYRO] = 6;
     dataLength[DATA_TYPE_COMMAND] = 1;
+    dataLength[DATA_TYPE_THROTTLE] = 4;
 }
 
 Communication::~Communication()
@@ -51,6 +52,24 @@ void Communication::sendData(void *data, int dataType)
     char bufHead[] = {0xaa,0x55,dataType};
     writeByte(bufHead,3);
     writeByte((char*)data,dataLength[dataType]);
+}
+
+void Communication::sendDataXmodem(char *data,int length)
+{
+    while(length)
+    {
+        if(length>=1024)
+        {
+            writeByte(data,1024);
+            length -= 1024;
+            data += 1024;
+        }
+        else
+        {
+            writeByte(data,length);
+            break;
+        }
+    }
 }
 
 void Communication::writeByte(char *data, int length)
@@ -92,6 +111,14 @@ bool Communication::getGyro(short *needGyro)
     for(int i=0;i<3;i++) needGyro[i] = gyro[i];
     if((isDataReady & DATA_TYPE_GYRO) == 0) return false;
     isDataReady &= ~((unsigned char)DATA_TYPE_GYRO);
+    return true;
+}
+
+bool Communication::getThrottle(uint8_t *needThrottle)
+{
+    for(int i=0;i<4;i++) needThrottle[i] = throttle[i];
+    if((isDataReady & DATA_TYPE_THROTTLE) == 0) return false;
+    isDataReady &= ~((unsigned char)DATA_TYPE_THROTTLE);
     return true;
 }
 
@@ -170,6 +197,9 @@ void Communication::getData()
             for(int i=0;i<3;i++)
                 gyro[i] = ((short*)temp)[i];
             break;
+        case DATA_TYPE_THROTTLE:
+            for(int i=0;i<4;i++)
+                throttle[i] = ((uint8_t*)temp)[i];
         default:
             break;
         }

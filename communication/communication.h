@@ -14,11 +14,12 @@ enum DATA_TYPE
     DATA_TYPE_ACCEL = DATA_TYPE_QUAT << 1,
     DATA_TYPE_GYRO = DATA_TYPE_ACCEL << 1,
     DATA_TYPE_EULER = DATA_TYPE_GYRO << 1,
-    DATA_TYPE_COMMAND = DATA_TYPE_EULER << 1,
+    DATA_TYPE_THROTTLE = DATA_TYPE_EULER << 1,//!!!!
+    DATA_TYPE_COMMAND = DATA_TYPE_THROTTLE << 1,
     DATA_TYPE_PARAM = DATA_TYPE_COMMAND << 1,
     DATA_TYPE_MESSAGE = DATA_TYPE_PARAM << 1,
     DATA_TYPE_ALL = DATA_TYPE_QUAT | DATA_TYPE_ACCEL | DATA_TYPE_GYRO | DATA_TYPE_EULER
-        | DATA_TYPE_COMMAND | DATA_TYPE_PARAM | DATA_TYPE_MESSAGE
+        | DATA_TYPE_THROTTLE | DATA_TYPE_COMMAND | DATA_TYPE_PARAM | DATA_TYPE_MESSAGE
 };
 
 enum COMMAND_TYPE
@@ -29,8 +30,9 @@ enum COMMAND_TYPE
     COMMAND_TYPE_SEND_QUAT = COMMAND_TYPE_RESTART << 1,
     COMMAND_TYPE_SEND_ACCEL = COMMAND_TYPE_SEND_QUAT << 1,
     COMMAND_TYPE_SEND_GYRO = COMMAND_TYPE_SEND_ACCEL << 1,
+    COMMAND_TYPE_SEND_THROTTLE = COMMAND_TYPE_SEND_GYRO << 1,//!!!!
     COMMAND_TYPE_All = COMMAND_TYPE_RUN | COMMAND_TYPE_RESTART
-        | COMMAND_TYPE_SEND_QUAT | COMMAND_TYPE_SEND_ACCEL | COMMAND_TYPE_SEND_GYRO
+        | COMMAND_TYPE_SEND_QUAT | COMMAND_TYPE_SEND_ACCEL | COMMAND_TYPE_SEND_GYRO | COMMAND_TYPE_SEND_THROTTLE
 };
 
 struct PortSettings
@@ -52,11 +54,13 @@ public:
 
     bool openSerialPort(const PortSettings &settings);
     void sendData(void *data,int dataType);
+    void sendDataXmodem(char *data, int length);
     void writeByte(char *data,int length);
     void writeByte(QByteArray &data);
     bool getQuat(long *needQuat);
     bool getAccel(short *needAccel);
     bool getGyro(short *needGyro);
+    bool getThrottle(uint8_t *needThrottle);
 
 signals:
     void dataReady(DATA_TYPE type);//成功获取一次数据发射
@@ -71,6 +75,7 @@ private:
     int dataLength[129];    //DATA_TYPE中各数据长度
     long quat[4];
     short accel[3],gyro[3];
+    uint8_t throttle[4];
 };
 
 #endif // COMMUNICATION_H

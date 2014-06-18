@@ -45,6 +45,7 @@ private:
     unsigned char CMD;
     unsigned char isTextBrowserDisplay;
     bool isRun;
+    bool isDisplayText;
 
 
 private slots:
@@ -52,6 +53,7 @@ private slots:
     void getQuatData();
     void getAccelData();
     void getGyroData();
+    void getThrottleData();
 
     void on_openclosebtn_clicked();
     void on_sendbtn_clicked();
